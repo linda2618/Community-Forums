@@ -5,12 +5,10 @@
 ul > li {
   list-style: none;
 }
-a{
+a {
   text-decoration: none;
 }
 .w {
   width: 1280px;
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%);
+  margin: 0 auto;
 }

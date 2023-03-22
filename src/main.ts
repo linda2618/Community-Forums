@@ -9,4 +9,9 @@ import "./assets/global.less";
 //导入字体图标
 import "./assets/icon/iconfont.css";
 
-createApp(App).use(router).use(ElementPlus).mount("#app");
+//定义成全局组件
+import Dialog from "./components/Dialog.vue";
+
+const app = createApp(App);
+app.component("Dialog");
+app.use(router).use(ElementPlus).mount("#app");
