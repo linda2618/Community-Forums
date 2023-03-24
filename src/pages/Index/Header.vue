@@ -24,10 +24,10 @@
 
             <div class="login">
                 <!-- <i class="iconfont icon-shouji"></i> -->
-                <button>登录 / 注册</button>
+                <button @click="showDialog = true">登录 / 注册</button>
             </div>
         </div>
-        <Dialog :show="true">这里是内容</Dialog>
+        <Dialog :buttons="buttons" :show="showDialog" @close="closeDialog">这里是内容</Dialog>
     </div>
 </template>
 
@@ -55,7 +55,15 @@ const logoInfo = ref([
         color: '#FFBA02'
     }
 ])
+const showDialog = ref(true)
 
+const buttons = [{
+    text: '确定',
+    type: 'primary'
+}]
+const closeDialog = () => {
+    showDialog.value = false
+}
 </script>
 
 <style scoped lang="less">

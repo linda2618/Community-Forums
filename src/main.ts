@@ -13,5 +13,5 @@ import "./assets/icon/iconfont.css";
 import Dialog from "./components/Dialog.vue";
 
 const app = createApp(App);
-app.component("Dialog");
+app.component("Dialog", Dialog);
 app.use(router).use(ElementPlus).mount("#app");
