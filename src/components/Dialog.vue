@@ -9,9 +9,9 @@
             <div class="dialog-body">
                 <slot></slot>
             </div>
-            <template v-if="(buttons && buttons.length > 0) || showCancel">
+            <template v-if="(buttons && buttons.length > 0 || showCancel)">
                 <div class="dialog-footer">
-                    <el-button @click="close" v-if="showCancel" type="info">取消</el-button>
+                    <el-button @click="close" type="info" :close-on-click-modal="showCancel">取消</el-button>
                     <el-button v-for="btn in buttons" :type="btn.type" @click="btn.click">{{ btn.text }}</el-button>
                 </div>
             </template>
@@ -24,53 +24,22 @@
 import { fa } from 'element-plus/es/locale';
 import { ref, reactive } from 'vue'
 
-// interface props {
-//     show?: Boolean
-//     title?: String
-//     showClose: Boolean
-//     width: String
-//     top: String
-//     buttons: Array<{ type: String, click: Function, text: String }>
-//     showCancel: Boolean
-
-// }
-// const props = withDefaults(defineProps<props>(), {
-//     // show: false,
-//     // title: "标题",
-
-// })
-
-
-
-const props = defineProps({
-    show: {
-        type: Boolean,
-        default: false
-    },
-    title: {
-        type: String,
-        default: "标题"
-    },
-    showClose: {
-        type: Boolean,
-        default: false
-    },
-    width: {
-        type: String,
-        default: "30%"
-    },
-    top: {
-        type: String,
-        default: "70px"
-    },
-    buttons: {
-        type: Array,
-
-    },
-    showCancel: {
-        type: Boolean,
-        default: true
-    },
+interface propsType {
+    show: Boolean
+    title?: String
+    showClose?: Boolean
+    width?: String
+    top?: String
+    buttons?: Array<{ type: String, click: Function, text: String }>,
+    showCancel?: Boolean
+}
+const props = withDefaults(defineProps<propsType>(), {
+    show: () => { return false },
+    title: () => { return "标题" },
+    showClose: () => { return true },
+    width: () => { return "40%" },
+    top: () => { return '70px' },
+    showCancel: () => { return false }
 })
 
 enum EventName {
@@ -84,15 +53,17 @@ const close = () => {
 
 }
 
+
 </script>
 
 <style scoped lang="less">
 .custom-dialog {
+
     .dialog-body {
         border-top: 1px solid #ddd;
         border-bottom: 1px solid #ddd;
-        min-height: 150px;
-        max-height: calc(100vh - 500px);
+        min-height: 280px;
+        max-height: calc(100vh - 300px);
         overflow: auto;
         padding: 15px;
     }

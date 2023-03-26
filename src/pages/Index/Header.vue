@@ -24,15 +24,19 @@
 
             <div class="login">
                 <!-- <i class="iconfont icon-shouji"></i> -->
-                <button @click="showDialog = true">登录 / 注册</button>
+                <button @click="showLoginRegister(0)">注册</button>
+                <button @click="showLoginRegister(1)">登录</button>
             </div>
         </div>
-        <Dialog :buttons="buttons" :show="showDialog" @close="closeDialog">这里是内容</Dialog>
+
+        <!-- 登录注册弹框 -->
+        <LoginAndRegister ref="loginRegisterRef">这里是内容</LoginAndRegister>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
+import LoginAndRegister from '../LoginAndRegister/index.vue'
 const input = ref('')
 const logoInfo = ref([
     {
@@ -55,15 +59,23 @@ const logoInfo = ref([
         color: '#FFBA02'
     }
 ])
-const showDialog = ref(true)
 
-const buttons = [{
-    text: '确定',
-    type: 'primary'
-}]
-const closeDialog = () => {
-    showDialog.value = false
+let loginRegisterRef = ref<{ showPanel: Function }>()
+
+//登录注册
+const showLoginRegister = (type: Number) => {
+    loginRegisterRef.value?.showPanel(type)
 }
+
+onMounted(() => {
+    console.log('22', loginRegisterRef.value);
+})
+
+
+
+
+
+
 </script>
 
 <style scoped lang="less">
@@ -122,6 +134,7 @@ const closeDialog = () => {
             button {
                 width: 80px;
                 height: 36px;
+                padding-bottom: 2px;
                 color: rgb(99, 208, 171);
                 background-color: #f1eeee;
                 border: 0;
@@ -139,16 +152,16 @@ const closeDialog = () => {
     .login {
         width: 180px;
 
+
         button {
             float: right;
             margin-top: 15px;
             height: 35px;
-            width: 100px;
+            width: 50px;
             font-size: 14px;
             color: #fff;
             background-color: rgb(102, 216, 178);
             border: 0;
-            border-radius: 8px;
         }
 
         button:hover {
