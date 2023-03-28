@@ -15,9 +15,15 @@
 
                 <!-- 登录密码 -->
                 <el-form-item prop="password" v-if="opType == 1">
-                    <el-input v-model="formData.password" type="password" placeholder="请输入密码" size="large">
+                    <el-input v-model="formData.password" :type="passwordEyeType.passwordEyeOpen ? 'text' : 'password'"
+                        placeholder="请输入密码" size="large">
                         <template #prefix>
                             <span class="iconfont icon-lock"></span>
+                        </template>
+                        <template #suffix>
+                            <span
+                                :class="['iconfont', passwordEyeType.passwordEyeOpen ? 'icon-yanjing1' : 'icon-yanjing-bi']"
+                                @click="changeEye('passwordEyeOpen')"></span>
                         </template>
                     </el-input>
                 </el-form-item>
@@ -44,10 +50,15 @@
                     </el-form-item>
                     <el-form-item prop="registerPassword">
                         <el-input v-model="formData.registerPassword"
-                            :type="passwordEyeType.reRegisterPasswordEyeOpen ? 'text' : 'password'" placeholder="请输入密码"
+                            :type="passwordEyeType.registerPasswordEyeOpen ? 'text' : 'password'" placeholder="请输入密码"
                             size="large">
                             <template #prefix>
                                 <span class="iconfont icon-lock"></span>
+                            </template>
+                            <template #suffix>
+                                <span
+                                    :class="['iconfont', passwordEyeType.registerPasswordEyeOpen ? 'icon-yanjing1' : 'icon-yanjing-bi']"
+                                    @click="changeEye('registerPasswordEyeOpen')"></span>
                             </template>
                         </el-input>
                     </el-form-item>
@@ -107,8 +118,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
+import type { FormInstance, FormRules, ElForm } from 'element-plus'
 
-import type { ElForm } from "element-plus"
 
 const { proxy } = getCurrentInstance() as any
 
@@ -122,12 +133,14 @@ const showPanel = (type: Number) => {
     opType.value = type
     console.log('11')
     resetForm()
-    console.log('22')
+    //刷新验证码
+    changeCheckImgUrl(0)
+    formDataRef.value?.resetFields()
 
 }
 defineExpose({ showPanel })
 
-const formData = reactive({
+const formData = ref({
     email: '',
     password: '',
     checkCode: '',
@@ -141,9 +154,40 @@ const formData = reactive({
 //解决方法一：把类型定义成any
 // const formDataRef = ref<any>()
 //解决方法二： .在vue的官方文档中Typescript支持里有告诉我们一个获取组件类型的方法，InstanceType<typeof 组件名称> 
-const formDataRef = ref<InstanceType<typeof ElForm>>()
-const rules = reactive([
-])
+// const formDataRef = ref<InstanceType<typeof ElForm>>()
+const formDataRef = ref<FormInstance>()
+const checkRePassword = (rule: any, value: String, callback: any) => {
+    if (value !== formData.value.registerPassword) {
+        callback(new Error(rule.message))
+    } else {
+        callback()
+    }
+}
+const rules = reactive({
+    email: [
+        { required: true, message: "请输入邮箱", trigger: 'blur' },
+        { validator: proxy.verify.email, message: "请输入正确的邮箱", trigger: 'blur' }
+    ],
+    emailCode: [{ required: true, message: "请输入邮箱验证码", trigger: 'blur' }],
+    nickName: [{ required: true, message: "请输入昵称", trigger: 'blur' }],
+    password: [
+        { required: true, message: "请输入密码", trigger: 'blur' },
+        { validator: proxy.verify.password, message: "密码只能是数字,字母,特殊字符8~18位", trigger: 'blur' }
+    ],
+    registerPassword: [{ required: true, message: "请输入密码", trigger: 'blur' },
+    {
+        validator: proxy.verify.password,
+        message: "密码只能是数字,字母,特殊字符8~18位", trigger: 'blur'
+    }],
+    reRegisterPassword: [{ required: true, message: "请再次输入密码 ", trigger: 'blur' },
+    {
+        validator: checkRePassword,
+        message: "两次输入的密码不一致"
+    }],
+    checkCode: [{ required: true, message: "请输入图片验证码", trigger: 'blur' }],
+})
+
+
 //验证码图片路径
 const checkImgUrl = ref(api.checkCode)
 const changeCheckImgUrl = (type: Number) => {
@@ -165,14 +209,6 @@ const resetForm = async () => {
         dialogConfig.title = "重置密码"
     }
 
-    await nextTick(() => {
-        console.log('nextTick');
-
-        //刷新验证码
-        changeCheckImgUrl(0)
-        console.log(formDataRef.value)
-        formDataRef.value?.resetFields()
-    })
     // await nextTick()
     // changeCheckImgUrl(0)
     // formDataRef.value?.resetFields()
