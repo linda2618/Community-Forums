@@ -1,181 +1,82 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from "axios";
-import { ElLoading } from "element-plus";
-import message from "../message";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { reactive } from "vue";
 
-interface CustomConfig {
-  showLoading?: boolean;
-  errorCallback?: Function;
-  showError?: boolean;
+interface Response<T = any> {
+  code: number;
+  data: T;
+  message: string;
 }
 
-const instance: AxiosInstance = axios.create({
+// 封装后的 Axios 类型
+interface Axios {
+  get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  post<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<T>;
+  put<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<T>;
+  delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
+}
+
+// 封装后的 Axios 实例类型
+interface AxiosInstanceType extends AxiosInstance {
+  <T = any>(config: AxiosRequestConfig): Promise<Response<T>>;
+  <T = any>(url: string, config?: AxiosRequestConfig): Promise<Response<T>>;
+}
+
+// 创建 Axios 实例
+const instance: AxiosInstanceType = axios.create({
   baseURL: "/api",
   timeout: 8000,
 });
 
-//请求拦截
-let loading: any = null;
+// 添加请求拦截器
 instance.interceptors.request.use(
-  (config): any => {
-    const { showLoading } = config as any;
-    if (showLoading) {
-      loading = ElLoading.service({
-        lock: true,
-        text: "加载中......",
-        background: "rgb(0, 0, 0, .5)",
-      });
-    }
+  (config: AxiosRequestConfig | any) => {
+    // 在发送请求之前做些什么
     return config;
   },
-  (error) => {
-    loading.close();
+  (error: any) => {
+    // 对请求错误做些什么
     return Promise.reject(error);
   }
 );
 
-//响应拦截
+// 添加响应拦截器
 instance.interceptors.response.use(
-  (response): any => {
-    const { showLoading, errorCallback, showError } = response.config as any;
-    if (showLoading && loading) {
-      loading.close();
+  (response: AxiosResponse<Response>) => {
+    // 对响应数据做点什么
+    if (response.data.code === 200) {
+      return response.data.data;
+    } else {
+      console.log(response.data.message);
+      return null;
     }
-    return response;
   },
-  (error) => {
-    const { errorCallback, showError, showLoading } = error.config as any;
-    if (showError) {
-      message.error(error.message);
-    }
-    if (errorCallback) {
-      errorCallback(error);
-    }
+  (error: any) => {
+    // 对响应错误做点什么
+    console.log(error);
     return Promise.reject(error);
   }
 );
 
-const request = (config: any) => {
-  const {
-    url,
-    params,
-    dataType,
-    errorCallback,
-    showLoading = true,
-    showError = true,
-  } = config;
-  let contentType = "application/x-www-form-urlencoded;charset=UTF-8";
-  let formData = new FormData();
-  for (let key in params) {
-    formData.append(key, params[key] == undefined ? "" : params[key]);
-  }
-  if (dataType != null && dataType === "json") {
-    contentType = "application/json";
-  }
-  let headers = {
-    "Content-Type": contentType,
-    "X-Requested-With": "XMLHttpRequest",
-  };
-  return instance.post(url, formData, {
-    headers: headers,
-    ...config, // 将自定义属性从参数对象中取出
-  });
+// 将 Axios 实例进行封装
+const axiosRequest: Axios = {
+  get: (url: string, config?: AxiosRequestConfig) => instance.get(url, config),
+  post: (url: string, data?: any, config?: AxiosRequestConfig) =>
+    instance.post(url, data, config),
+  put: (url: string, data?: any, config?: AxiosRequestConfig) =>
+    instance.put(url, data, config),
+  delete: (url: string, config?: AxiosRequestConfig) =>
+    instance.delete(url, config),
 };
 
-export default request;
+// 使用 reactive 函数将 Axios 实例转化为响应式对象，方便在组件中使用
+const reactiveAxios = reactive(axiosRequest);
 
-// import axios, { Axios, AxiosResponse, AxiosRequestConfig } from "axios";
-
-// import { ElLoading } from "element-plus";
-// import message from "../message";
-
-// interface CustomConfig {
-//   showLoading?: boolean;
-//   errorCallback?: Function;
-//   showError?: boolean;
-// }
-
-// const customConfig: CustomConfig = {
-//   showLoading: true,
-//   errorCallback: () => {},
-//   showError: true,
-// };
-
-// const axiosConfig: AxiosRequestConfig = {
-//   headers: {
-//     "Content-Type": "application/json",
-//     "X-Requested-With": "application/x-www-form-urlencoded;charset=UTF-8",
-//   },
-//   ...customConfig, // 将自定义属性从参数对象中取出
-// } as AxiosRequestConfig<FormData>;
-// const contentTypeForm = "application/x-www-form-urlencoded;charset=UTF-8";
-// const contentTypeJson = "application/json";
-
-// const instance = axios.create({
-//   baseURL: "/api",
-//   timeout: 8000,
-// });
-
-// //请求拦截
-// let loading: any = null;
-// instance.interceptors.request.use(
-//   (config): any => {
-//     if ((config as any).showLoading) {
-//       loading = ElLoading.service({
-//         lock: true,
-//         text: "加载中......",
-//         background: "rgb(0, 0, 0, .5)",
-//       });
-//     }
-//   },
-//   (error) => {
-//     loading.close();
-//   }
-// );
-
-// //响应拦截
-// instance.interceptors.response.use(
-//   (response): any => {
-//     const { showLoading, errorCallback, showError } = response.config as any;
-//     if (showLoading && loading) {
-//       loading.close();
-//     }
-//   },
-//   (error) => {}
-// );
-
-// const request = (config: any) => {
-//   const {
-//     url,
-//     params,
-//     dataType,
-//     errorCallback,
-//     showLoading = true,
-//     showError = true,
-//   } = config;
-//   let contentType = contentTypeForm;
-//   let formData = new FormData();
-//   for (let key in params) {
-//     formData.append(key, params[key] == undefined ? "" : params[key]);
-//   }
-//   if (dataType != null && dataType === "json") {
-//     contentType = contentTypeJson;
-//   }
-//   let headers = {
-//     "Content-Type": contentType,
-//     "X-Requested-With": "XMLHttpRequest",
-//   };
-//   return instance
-//     .post(url, formData, {
-//       headers: headers,
-//       showLoading: showLoading,
-//       errorCallback: errorCallback,
-//       showError: showError,
-//     })
-//     .catch((error) => {
-//       if (error.showError) {
-//         message.error(error.msg);
-//       }
-//     });
-// };
-
-// export default request;
+export default reactiveAxios;
