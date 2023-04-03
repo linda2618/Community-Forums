@@ -17,8 +17,6 @@ import Message from "./utils/message";
 import Request from "./utils/axios/http";
 
 const app = createApp(App);
-// 开启loading
-app.config.globalProperties.$loading.showLoading();
 app.config.globalProperties.verify = Verity;
 app.config.globalProperties.message = Message;
 app.config.globalProperties.request = Request;

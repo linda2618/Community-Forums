@@ -32,13 +32,14 @@
                 <div v-if="opType == 0 || opType == 2">
                     <el-form-item prop="emailCode">
                         <div class="yanzhengma-box">
-                            <el-input v-model="formData.emailCode" type="text" placeholder="请输入邮箱验证码" size="large"
-                                clearable>
+                            <el-input v-model="formData.emailCode" ref="formDataSendEmailCodeRef" type="text"
+                                placeholder="请输入邮箱验证码" size="large" clearable>
                                 <template #prefix>
                                     <span class="iconfont icon-yanzhengma1"></span>
                                 </template>
                             </el-input>
-                            <el-button type="primary" size="large" class="check-btn">获取验证码</el-button>
+                            <el-button type="primary" size="large" class="check-btn"
+                                @click="sendEmailCode">获取验证码</el-button>
                         </div>
                     </el-form-item>
                     <el-form-item prop="nickName" v-if="opType == 0">
@@ -125,7 +126,8 @@ const { proxy } = getCurrentInstance() as any
 
 //api
 const api = {
-    checkCode: "/api/checkCode"
+    checkCode: "/api/checkCode",
+    sendEmailCode: "/sendEmailCode"
 }
 //0:注册，1：登录
 const opType = ref()
@@ -150,6 +152,19 @@ const formData = ref({
     registerPassword: '',
     reRegisterPassword: ''
 })
+
+
+//发送邮件
+const sendEmailCode = async () => {
+    const params = Object.assign({}, formData.value.email)
+    let result = await proxy.request({
+        url: api.sendEmailCode,
+        params: params
+    })
+    if (!result) {
+        return
+    }
+}
 
 //解决方法一：把类型定义成any
 // const formDataRef = ref<any>()
