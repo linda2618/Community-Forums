@@ -32,14 +32,14 @@
                 <div v-if="opType == 0 || opType == 2">
                     <el-form-item prop="emailCode">
                         <div class="yanzhengma-box">
-                            <el-input v-model="formData.emailCode" ref="formDataSendEmailCodeRef" type="text"
-                                placeholder="请输入邮箱验证码" size="large" clearable>
+                            <el-input v-model="formData.emailCode" type="text" placeholder="请输入邮箱验证码" size="large"
+                                clearable>
                                 <template #prefix>
                                     <span class="iconfont icon-yanzhengma1"></span>
                                 </template>
                             </el-input>
                             <el-button type="primary" size="large" class="check-btn"
-                                @click="sendEmailCode">获取验证码</el-button>
+                                @click="showSendEmailDialog">获取验证码</el-button>
                         </div>
                     </el-form-item>
                     <el-form-item prop="nickName" v-if="opType == 0">
@@ -109,11 +109,38 @@
                     </div>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" class="login-btn">登录</el-button>
+                    <el-button type="primary" class="login-btn" @click="doSubmit">
+                        <span v-if="opType == 0">注册</span>
+                        <span v-if="opType == 1">登录</span>
+                        <span v-if="opType == 2">重置密码</span>
+                    </el-button>
                 </el-form-item>
             </el-form>
 
         </Dialog>
+    </div>
+    <!-- 发送邮件验证码弹窗 -->
+    <Dialog :show="dialogConfigSendEmailCode.show" :title="dialogConfigSendEmailCode.title"
+        :buttons="dialogConfigSendEmailCode.buttons" width="500px" :showCancel="false"
+        @close="dialogConfigSendEmailCode.show = false">
+        <el-form :model="formDataSendEmailCode" :rules="rules" ref="formDataSendEmailCodeRef" label-width="80px">
+            <el-form-item label="邮箱 :">
+                {{ formData.email }}
+            </el-form-item>
+            <el-form-item label="验证码" prop="checkCode">
+                <div class="checkCode">
+                    <el-input size="large" placeholder="请输入验证码" v-model="formDataSendEmailCode.checkCode">
+                        <template #prefix>
+                            <span class="iconfont icon-yanzhengma1"></span>
+                        </template>
+                    </el-input>
+                    <img :src="checkCodeUrlSendEmailCode" class="check=code" @click="changeCheckImgUrl(1)" />
+                </div>
+            </el-form-item>
+        </el-form>
+    </Dialog>
+    <div>
+
     </div>
 </template>
 
@@ -127,7 +154,10 @@ const { proxy } = getCurrentInstance() as any
 //api
 const api = {
     checkCode: "/api/checkCode",
-    sendEmailCode: "/sendEmailCode"
+    sendEmailCode: "/sendEmailCode",
+    register: '/register',
+    login: ' /login',
+    resetPwd: ' /resetPwd'
 }
 //0:注册，1：登录
 const opType = ref()
@@ -153,17 +183,66 @@ const formData = ref({
     reRegisterPassword: ''
 })
 
+interface paramsData {
+    email?: String,
+    checkCode?: String,
+    type?: Number
 
-//发送邮件
-const sendEmailCode = async () => {
-    const params = Object.assign({}, formData.value.email)
-    let result = await proxy.request({
-        url: api.sendEmailCode,
-        params: params
+}
+//发送邮箱验证码弹窗
+const formDataSendEmailCode: any = ref({
+})
+const formDataSendEmailCodeRef = ref<FormInstance>()
+const dialogConfigSendEmailCode = reactive({
+    show: false,
+    title: "发送邮箱验证码",
+    buttons: [
+        {
+            type: "primary",
+            text: "发送验证码",
+            click: () => {
+                sendEmailCode()
+            }
+        }
+    ]
+
+})
+
+const showSendEmailDialog = () => {
+    console.log('邮箱验证码！')
+    formDataRef.value?.validateField("email", (valid) => {
+        if (!valid) {
+            return
+        }
+        dialogConfigSendEmailCode.show = true
+
+        nextTick(() => {
+            changeCheckImgUrl(1)
+            formDataSendEmailCodeRef.value?.resetFields()
+            formDataSendEmailCode.value = {
+                email: formData.value.email
+            }
+        })
     })
-    if (!result) {
-        return
-    }
+}
+//发送邮件
+const sendEmailCode = () => {
+    formDataSendEmailCodeRef.value?.validate(async (valid) => {
+        if (!valid) { return }
+
+        const params: paramsData = Object.assign({}, formDataSendEmailCode.value)
+        params.type = 0
+        let result = await proxy.request({
+            url: api.sendEmailCode,
+            params: params
+        })
+        if (!result) {
+            return
+        }
+        proxy.message.success("验证码发送成功！请登录邮箱查看！")
+        dialogConfigSendEmailCode.show = false
+    })
+
 }
 
 //解决方法一：把类型定义成any
@@ -203,12 +282,17 @@ const rules = reactive({
 })
 
 
-//验证码图片路径
+//验证码  图片路径
 const checkImgUrl = ref(api.checkCode)
+const checkCodeUrlSendEmailCode = ref(api.checkCode)
 const changeCheckImgUrl = (type: Number) => {
-    checkImgUrl.value = api.checkCode + "?type=" + type + "&time=" + new Date().getTime()
+    if (type == 0) {
+        checkImgUrl.value = api.checkCode + "?type=" + type + "&time=" + new Date().getTime()
+    } else {
+        checkCodeUrlSendEmailCode.value = api.checkCode + "?type=" + type + "&time=" + new Date().getTime()
+    }
 }
-//弹窗基本信息
+//登录注册 弹窗基本信息
 const dialogConfig = reactive({
     show: false,
     title: '登录/注册',
@@ -227,7 +311,6 @@ const resetForm = async () => {
     // await nextTick()
     // changeCheckImgUrl(0)
     // formDataRef.value?.resetFields()
-
 }
 
 //控制密码显示与隐藏
@@ -242,18 +325,42 @@ const changeEye = (type: String) => {
 
 }
 
+//登录，注册，重置表单提交表单
+const doSubmit = () => {
+    formDataRef.value?.validate(async (valid) => {
+        if (!valid) {
+            return
+        }
+        let params: any = {}
+        Object.assign(params, formData.value)
+        //注册
+        if (opType.value == 0) {
+            params.password = params.registerPassword
+        }
+        let url = null
+        if (opType.value == 0) {
+            url = api.register
+        } else if (opType.value == 1) {
+            url = api.login
+        } else if (opType.value == 2) {
+            url = api.resetPwd
+        }
+        let result = await proxy.request({
+            url: url,
+            params: params
+        })
+
+
+
+
+    })
+}
+
+
 </script>
 
 <style scoped lang="less">
 .login-register {
-    .checkCode {
-        display: flex;
-
-        .checkImg {
-            margin-left: 5px;
-            cursor: pointer;
-        }
-    }
 
     .yanzhengma-box {
         display: flex;
@@ -282,6 +389,16 @@ const changeEye = (type: String) => {
 
     .login-btn {
         width: 100%;
+    }
+
+}
+
+.checkCode {
+    display: flex;
+
+    .checkImg {
+        margin-left: 5px;
+        cursor: pointer;
     }
 }
 </style>

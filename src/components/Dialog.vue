@@ -62,7 +62,7 @@ const close = () => {
     .dialog-body {
         border-top: 1px solid #ddd;
         border-bottom: 1px solid #ddd;
-        min-height: 280px;
+        min-height: 120px;
         max-height: calc(100vh - 300px);
         overflow: auto;
         padding: 15px;
