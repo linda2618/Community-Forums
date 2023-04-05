@@ -147,7 +147,10 @@
 <script setup lang="ts">
 import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
 import type { FormInstance, FormRules, ElForm } from 'element-plus'
-
+import { de, pa } from 'element-plus/es/locale';
+// 按需引用：(信息摘要算法: 对称加密)
+import { Md5 } from "ts-md5";
+const md5: any = new Md5()
 
 const { proxy } = getCurrentInstance() as any
 
@@ -231,7 +234,7 @@ const sendEmailCode = () => {
         if (!valid) { return }
 
         const params: paramsData = Object.assign({}, formDataSendEmailCode.value)
-        params.type = 0
+        params.type = opType.value == 0 ? 0 : 1
         let result = await proxy.request({
             url: api.sendEmailCode,
             params: params
@@ -298,7 +301,7 @@ const dialogConfig = reactive({
     title: '登录/注册',
 })
 //重置表单
-const resetForm = async () => {
+const resetForm = () => {
     dialogConfig.show = true
     if (opType.value == 0) {
         dialogConfig.title = '注册'
@@ -307,10 +310,16 @@ const resetForm = async () => {
     } else if (opType.value == 2) {
         dialogConfig.title = "重置密码"
     }
+    //登录
+    if (opType.value == 1) {
+        const cookieLogin = proxy.VueCookies.get("loginInfo")
+        if (cookieLogin) {
+            formData.value = cookieLogin
+            console.log(formData)
+        }
+    }
 
-    // await nextTick()
-    // changeCheckImgUrl(0)
-    // formDataRef.value?.resetFields()
+
 }
 
 //控制密码显示与隐藏
@@ -334,9 +343,22 @@ const doSubmit = () => {
         let params: any = {}
         Object.assign(params, formData.value)
         //注册
-        if (opType.value == 0) {
+        if (opType.value == 0 || opType.value == 2) {
             params.password = params.registerPassword
+            delete params.registerPassword
+            delete params.reRegisterPassword
         }
+        //登录
+
+        if (opType.value == 1) {
+            let cookieLogin = proxy.VueCookies.get("loginInfo")
+            let cookiePassword = cookieLogin == null ? null : cookieLogin.password
+
+            if (params.password !== cookieLogin.password) {
+                params.password = md5(params.password)
+            }
+        }
+
         let url = null
         if (opType.value == 0) {
             url = api.register
@@ -349,6 +371,32 @@ const doSubmit = () => {
             url: url,
             params: params
         })
+        if (!result) { return }
+
+        //注册返回
+        if (opType.value == 0) {
+            proxy.message.success('注册成功，请登录！')
+            showPanel(1)
+        } else if (opType.value == 1) {
+            //登录
+            if (params.rememberMe) {  //勾选，记住我框
+                const loginInfo = {
+                    email: params.email,
+                    password: params.password,
+                    rememberMe: params.rememberMe
+                }
+                proxy.VueCookies.set("loginInfo", loginInfo, '7000')
+            } else {
+                proxy.VueCookies.remove("loginInfo")
+            }
+            dialogConfig.show = false
+            proxy.message.success("登录成功")
+
+        } else if (opType.value == 2) {
+            //重置密码
+            proxy.message.success('重置密码成功，请登录！')
+            showPanel(1)
+        }
 
 
 

@@ -16,7 +16,7 @@ instance.interceptors.request.use(
   },
   (error: any) => {
     // 对请求错误做些什么
-    message.error("请求发送失败");
+    message.error(error.msg);
     return Promise.reject(error);
   }
 );
@@ -30,11 +30,12 @@ instance.interceptors.response.use(
     } else if (responseData.code == 901) {
       return Promise.reject("登录超时");
     } else {
+      message.error(responseData.info);
       return Promise.reject({ msg: responseData.info });
     }
   },
   (error: any) => {
-    console.log("err" + error);
+    message.error(error.msg);
     return Promise.reject(error);
   }
 );
