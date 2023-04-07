@@ -11,18 +11,25 @@ import "element-plus/dist/index.css";
 import "./assets/global.less";
 //导入字体图标
 import "./assets/icon/iconfont.css";
+//映入store
+import store from "./store";
 
 //定义成全局组件
 import Dialog from "./components/Dialog.vue";
+import Avatar from "./components/avatar.vue";
 //定义全局方法
 import Verity from "./utils/verify";
 import Message from "./utils/message";
 import Request from "./utils/axios/http";
 
 const app = createApp(App);
+app.config.globalProperties.globalInfo = {
+  avatarUrl: "/api/file/getAvatar/",
+};
 app.config.globalProperties.VueCookies = VueCookies;
 app.config.globalProperties.verify = Verity;
 app.config.globalProperties.message = Message;
 app.config.globalProperties.request = Request;
 app.component("Dialog", Dialog);
-app.use(router).use(ElementPlus).mount("#app");
+app.component("Avatar", Avatar);
+app.use(router).use(ElementPlus).use(store).mount("#app");

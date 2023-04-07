@@ -147,26 +147,24 @@
 <script setup lang="ts">
 import { ref, reactive, getCurrentInstance, nextTick } from 'vue'
 import type { FormInstance, FormRules, ElForm } from 'element-plus'
-import { de, pa } from 'element-plus/es/locale';
+import { useStore } from 'vuex'
 // 按需引用：(信息摘要算法: 对称加密)
-import { Md5 } from "ts-md5";
-const md5: any = new Md5()
+import md5 from "js-md5"
 
 const { proxy } = getCurrentInstance() as any
-
+const store = useStore()
 //api
 const api = {
     checkCode: "/api/checkCode",
     sendEmailCode: "/sendEmailCode",
     register: '/register',
-    login: ' /login',
+    login: '/login',
     resetPwd: ' /resetPwd'
 }
 //0:注册，1：登录
 const opType = ref()
 const showPanel = (type: Number) => {
     opType.value = type
-    console.log('11')
     resetForm()
     //刷新验证码
     changeCheckImgUrl(0)
@@ -212,7 +210,6 @@ const dialogConfigSendEmailCode = reactive({
 })
 
 const showSendEmailDialog = () => {
-    console.log('邮箱验证码！')
     formDataRef.value?.validateField("email", (valid) => {
         if (!valid) {
             return
@@ -310,15 +307,16 @@ const resetForm = () => {
     } else if (opType.value == 2) {
         dialogConfig.title = "重置密码"
     }
-    //登录
-    if (opType.value == 1) {
-        const cookieLogin = proxy.VueCookies.get("loginInfo")
-        if (cookieLogin) {
-            formData.value = cookieLogin
-            console.log(formData)
+    nextTick(() => {
+        console.log('nextTick')
+        //登录
+        if (opType.value == 1) {
+            const cookieLogin = proxy.VueCookies.get("loginInfo")
+            if (cookieLogin) {
+                formData.value = cookieLogin
+            }
         }
-    }
-
+    })
 
 }
 
@@ -349,12 +347,10 @@ const doSubmit = () => {
             delete params.reRegisterPassword
         }
         //登录
-
         if (opType.value == 1) {
             let cookieLogin = proxy.VueCookies.get("loginInfo")
             let cookiePassword = cookieLogin == null ? null : cookieLogin.password
-
-            if (params.password !== cookieLogin.password) {
+            if (params.password !== cookiePassword) {
                 params.password = md5(params.password)
             }
         }
@@ -383,24 +379,24 @@ const doSubmit = () => {
                 const loginInfo = {
                     email: params.email,
                     password: params.password,
-                    rememberMe: params.rememberMe
+                    rememberMe: params.rememberMe,
+                    checkCode: params.checkCode
                 }
-                proxy.VueCookies.set("loginInfo", loginInfo, '7000')
+                console.log('set', loginInfo)
+                proxy.VueCookies.set("loginInfo", loginInfo, '7d')
             } else {
                 proxy.VueCookies.remove("loginInfo")
             }
             dialogConfig.show = false
-            proxy.message.success("登录成功")
+            proxy.message.success("登录成功!")
+            store.commit("updateLoginUserInfo", result.data)
+
 
         } else if (opType.value == 2) {
             //重置密码
             proxy.message.success('重置密码成功，请登录！')
             showPanel(1)
         }
-
-
-
-
     })
 }
 

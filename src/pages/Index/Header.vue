@@ -22,11 +22,47 @@
                 </div>
             </div>
 
-            <div class="login">
-                <!-- <i class="iconfont icon-shouji"></i> -->
+
+            <!-- 登录后显示 -->
+            <div v-if="userInfo.userId" class="afterLogin">
+                <div class="messageInfo">
+                    <el-dropdown>
+                        <el-badge :value="200" :max="99" class="item">
+                            <div class="iconfont icon-message1"></div>
+                        </el-badge>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item>回复我的</el-dropdown-item>
+                                <el-dropdown-item>赞了我的文章</el-dropdown-item>
+                                <el-dropdown-item>赞了我的评论</el-dropdown-item>
+                                <el-dropdown-item>系统消息</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+                </div>
+                <div class="userInfo">
+                    <!-- 图像 -->
+                    <el-dropdown>
+                        <Avatar userId="7437465925"></Avatar>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item>我的主页</el-dropdown-item>
+                                <el-dropdown-item>退出</el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+
+                </div>
+            </div>
+
+
+            <div class="login" v-else>
                 <button @click="showLoginRegister(0)">注册</button>
                 <button @click="showLoginRegister(1)">登录</button>
             </div>
+
+
+
         </div>
 
         <!-- 登录注册弹框 -->
@@ -35,9 +71,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch, getCurrentInstance } from 'vue'
+
+import { useStore } from 'vuex'
 import LoginAndRegister from '../LoginAndRegister/index.vue'
+const { proxy } = getCurrentInstance() as any
+
+const store = useStore()
 const input = ref('')
+const api = {
+    getUserInfo: "/getUserInfo"
+}
+
+
 const logoInfo = ref([
     {
         id: 1,
@@ -68,12 +114,27 @@ const showLoginRegister = (type: Number) => {
 }
 
 onMounted(() => {
-    console.log('22', loginRegisterRef.value);
+    getUserInfo()
 })
+//获取用户信息
+const getUserInfo = async () => {
+    let result = await proxy.request({
+        url: api.getUserInfo,
+    })
+    if (!result) { return }
+    store.commit("updateLoginUserInfo", result.data)
+}
 
+// 监听 登录用户信息
+const userInfo: any = ref({})
+watch(() => store.state.loginUserInfo, (newValue, oldValue) => {
+    if (newValue != undefined && newValue != null) {
+        userInfo.value = newValue
+    } else {
+        userInfo.value = {}
+    }
 
-
-
+}, { immediate: true, deep: true })
 
 
 </script>
@@ -89,7 +150,6 @@ onMounted(() => {
     height: 60px;
     line-height: 60px;
     display: flex;
-
 
     .logo {
         height: 100%;
@@ -107,7 +167,7 @@ onMounted(() => {
     }
 
     .nav-menu {
-        flex: 1;
+        width: 650px;
         display: flex;
 
         li {
@@ -145,6 +205,28 @@ onMounted(() => {
             }
 
 
+        }
+    }
+
+    .afterLogin {
+        .messageInfo {
+            float: left;
+            margin-left: 30px;
+            margin-right: 30px;
+            padding-top: 20px;
+
+            .iconfont {
+                font-size: 25px;
+            }
+
+
+
+        }
+
+        .userInfo {
+            padding-top: 5px;
+            float: right;
+            cursor: pointer;
         }
     }
 

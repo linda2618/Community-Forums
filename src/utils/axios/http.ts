@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { pa } from "element-plus/es/locale";
 import message from "../message";
+// import { dataType } from "element-plus/es/components/table-v2/src/common";
 
 const instance = axios.create({
   baseURL: "/api",
@@ -43,18 +44,23 @@ instance.interceptors.response.use(
 interface configData {
   url: string;
   params?: any;
+  dataType?: String;
 }
 const request = (config: configData) => {
-  const { url, params } = config;
+  const { url, params, dataType } = config;
+  let contentType = contentTypeForm;
   let formData = new FormData();
   for (let key in params) {
     formData.append(key, params[key] == undefined ? "" : params[key]);
+  }
+  if (dataType != null && dataType === "json") {
+    contentType = contentTypeJson;
   }
   let headers = {
     "Content-Type": contentTypeForm,
     "X-Requested-With": "XMLHttpRequest",
   };
-  return instance.post(url, formData);
+  return instance.post(url, formData, { headers });
 };
 
 export default request;

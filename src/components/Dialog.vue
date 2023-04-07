@@ -26,10 +26,10 @@ import { ref, reactive } from 'vue'
 
 interface propsType {
     show: Boolean
-    title?: String
+    title?: string
     showClose?: Boolean
-    width?: String
-    top?: String
+    width?: string
+    top?: string
     buttons?: Array<{ type: String, click: Function, text: String }>,
     showCancel?: Boolean
 }
