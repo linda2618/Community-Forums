@@ -4,8 +4,8 @@
 
 
         <!-- 路由占位符 -->
-        <!-- <router-view></router-view> -->
-        <Main></Main>
+        <router-view></router-view>
+        <!-- <Main></Main> -->
 
         <!-- 底部模块 -->
         <Footer></Footer>

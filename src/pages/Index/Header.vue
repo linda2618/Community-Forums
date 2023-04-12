@@ -6,14 +6,24 @@
                 <span v-for="item in logoInfo" :key="item.id" :style="{ color: item.color }">{{ item.letter }}</span>
             </div>
 
-            <ul class="nav-menu">
-                <li>首页</li>
-                <li>题库</li>
-                <li>面试</li>
-                <li>求职</li>
-                <li>学习</li>
-                <li>竞赛</li>
-            </ul>
+            <!-- 模板信息 -->
+
+            <div class="nav-menu">
+                <span class="menu-item">全部</span>
+                <template v-for="board in boardList">
+                    <el-popover placement="bottom-start" :width="300" trigger="hover" v-if="board.children.length > 0">
+                        <template #reference>
+                            <span class="menu-item">{{ board.boardName }}</span>
+                        </template>
+
+                        <div class="sub-board-list">
+                            <span v-for="subList in board.children" class="sub-board">{{ subList.boardName }}</span>
+                        </div>
+                    </el-popover>
+                    <span class="menu-item" v-else>{{ board.boardName }}</span>
+
+                </template>
+            </div>
 
             <div class="nav-search">
                 <div class="nav-search-container">
@@ -80,7 +90,8 @@ const { proxy } = getCurrentInstance() as any
 const store = useStore()
 const input = ref('')
 const api = {
-    getUserInfo: "/getUserInfo"
+    getUserInfo: "/getUserInfo",
+    getBoardList: "/board/loadBoard"
 }
 
 
@@ -124,6 +135,16 @@ const getUserInfo = async () => {
     if (!result) { return }
     store.commit("updateLoginUserInfo", result.data)
 }
+//获取板块信息列表
+const boardList: any = ref([])
+const getBoardList = async () => {
+    let result = await proxy.request({
+        url: api.getBoardList
+    })
+    if (!result) { return }
+    boardList.value = result.data
+}
+getBoardList()
 
 // 监听 登录用户信息
 const userInfo: any = ref({})
@@ -135,7 +156,13 @@ watch(() => store.state.loginUserInfo, (newValue, oldValue) => {
     }
 
 }, { immediate: true, deep: true })
+//监听是否展示登录框
+watch(() => store.state.showLogin, (newValue, oldValue) => {
+    if (newValue) {
+        showLoginRegister(1)
+    }
 
+}, { immediate: true, deep: true })
 
 </script>
 
@@ -167,11 +194,10 @@ watch(() => store.state.loginUserInfo, (newValue, oldValue) => {
     }
 
     .nav-menu {
-        width: 650px;
-        display: flex;
+        width: 550px;
 
-        li {
-            flex: 6;
+        .menu-item {
+            margin-left: 40px;
         }
     }
 
@@ -256,5 +282,26 @@ watch(() => store.state.loginUserInfo, (newValue, oldValue) => {
 
     }
 
+}
+
+
+.sub-board-list {
+    display: flex;
+    flex-wrap: wrap;
+
+    .sub-board {
+        padding: 0 10px;
+        border-radius: 20px;
+        margin-right: 10px;
+        background-color: #ddd;
+        border: 1px solid #ddd;
+        color: rgb(135, 134, 134);
+        margin-top: 10px;
+        cursor: pointer;
+    }
+
+    .sub-board:hover {
+        color: rgb(64, 158, 255)
+    }
 }
 </style>

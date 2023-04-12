@@ -6,6 +6,13 @@ const routes: Array<RouteRecordRaw> = [
     path: "/",
     name: "index",
     component: Index,
+    children: [
+      {
+        path: "/",
+        name: "所有文章",
+        component: () => import("../pages/forum/articleList.vue"),
+      },
+    ],
   },
 ];
 

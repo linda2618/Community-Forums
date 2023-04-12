@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { pa } from "element-plus/es/locale";
 import message from "../message";
+import store from "../../store";
 // import { dataType } from "element-plus/es/components/table-v2/src/common";
 
 const instance = axios.create({
@@ -29,6 +30,8 @@ instance.interceptors.response.use(
     if (responseData.code == 200) {
       return responseData;
     } else if (responseData.code == 901) {
+      store.commit("changeShowLogin", true);
+      store.commit("updateLoginUserInfo", null);
       return Promise.reject("登录超时");
     } else {
       message.error(responseData.info);

@@ -17,6 +17,7 @@ import store from "./store";
 //定义成全局组件
 import Dialog from "./components/Dialog.vue";
 import Avatar from "./components/avatar.vue";
+import Pagination from "./components/Pagination.vue";
 //定义全局方法
 import Verity from "./utils/verify";
 import Message from "./utils/message";
@@ -32,4 +33,5 @@ app.config.globalProperties.message = Message;
 app.config.globalProperties.request = Request;
 app.component("Dialog", Dialog);
 app.component("Avatar", Avatar);
+app.component("Pagination", Pagination);
 app.use(router).use(ElementPlus).use(store).mount("#app");
