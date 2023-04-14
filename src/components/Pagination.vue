@@ -1,5 +1,7 @@
 <template>
-    <div v-if="!loading && dataSource.list != null && dataSource.list.length == 0">暂无数据</div>
+    <div v-if="!loading && dataSource.list != null && dataSource.list.length == 0">
+        <Nodata :msg="noDataMsg"></Nodata>
+    </div>
     <!-- 骨架 -->
     <div class="skeleton" v-if="loading">
         <el-skeleton :row="3" animated></el-skeleton>
@@ -31,11 +33,13 @@ interface pageType {
 interface pageDataType {
     dataSource: pageType
     loading: Boolean
+    noDataMsg: string
 }
 //分页列表数据
 const props = withDefaults(defineProps<pageDataType>(), {
     dataSource: () => { return {} },
-    loading: () => { return false }
+    loading: () => { return false },
+    noDataMsg: () => { return '空空如也' }
 })
 
 const emits = defineEmits(['loadData'])

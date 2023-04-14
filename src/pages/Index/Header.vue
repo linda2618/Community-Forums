@@ -9,18 +9,19 @@
             <!-- 模板信息 -->
 
             <div class="nav-menu">
-                <span class="menu-item">全部</span>
+                <span class="menu-item" to="/">首页</span>
                 <template v-for="board in boardList">
                     <el-popover placement="bottom-start" :width="300" trigger="hover" v-if="board.children.length > 0">
                         <template #reference>
-                            <span class="menu-item">{{ board.boardName }}</span>
+                            <span class="menu-item" @click="boardClick(board)">{{ board.boardName }}</span>
                         </template>
 
                         <div class="sub-board-list">
-                            <span v-for="subList in board.children" class="sub-board">{{ subList.boardName }}</span>
+                            <span v-for="subList in board.children" class="sub-board" @click="subBoardClick(subList)">{{
+                                subList.boardName }}</span>
                         </div>
                     </el-popover>
-                    <span class="menu-item" v-else>{{ board.boardName }}</span>
+                    <span class="menu-item" v-else @click="boardClick(board)">{{ board.boardName }}</span>
 
                 </template>
             </div>
@@ -85,6 +86,7 @@ import { ref, reactive, onMounted, watch, getCurrentInstance } from 'vue'
 
 import { useStore } from 'vuex'
 import LoginAndRegister from '../LoginAndRegister/index.vue'
+import router from '../../router';
 const { proxy } = getCurrentInstance() as any
 
 const store = useStore()
@@ -143,6 +145,7 @@ const getBoardList = async () => {
     })
     if (!result) { return }
     boardList.value = result.data
+    store.commit("saveBoardList", result.data)
 }
 getBoardList()
 
@@ -164,6 +167,16 @@ watch(() => store.state.showLogin, (newValue, oldValue) => {
 
 }, { immediate: true, deep: true })
 
+
+
+//板块点击
+const boardClick = (board: any) => {
+    console.log(board.boardId)
+    router.push(`/forum/${board.boardId}`)
+}
+const subBoardClick = (subBoard: any) => {
+    router.push(`/forum/${subBoard.pBoardId}/${subBoard.boardId}`)
+}
 </script>
 
 <style scoped lang="less">
@@ -198,6 +211,7 @@ watch(() => store.state.showLogin, (newValue, oldValue) => {
 
         .menu-item {
             margin-left: 40px;
+            cursor: pointer;
         }
     }
 

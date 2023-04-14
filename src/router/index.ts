@@ -12,6 +12,21 @@ const routes: Array<RouteRecordRaw> = [
         name: "所有文章",
         component: () => import("../pages/forum/articleList.vue"),
       },
+      {
+        path: "/forum/:pBoardId",
+        name: "一级板块",
+        component: () => import("../pages/forum/articleList.vue"),
+      },
+      {
+        path: "/forum/:pBoardId/:boardId",
+        name: "二级板块",
+        component: () => import("../pages/forum/articleList.vue"),
+      },
+      {
+        path: "/user/:userId",
+        name: "用户信息",
+        component: () => import("../pages/userCenter/UCenter.vue"),
+      },
     ],
   },
 ];
