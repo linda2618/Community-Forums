@@ -23,6 +23,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("../pages/forum/articleList.vue"),
       },
       {
+        path: "/post/:articleId",
+        name: "文章详情",
+        component: () => import("../pages/forum/articleDetail.vue"),
+      },
+      {
         path: "/user/:userId",
         name: "用户信息",
         component: () => import("../pages/userCenter/UCenter.vue"),

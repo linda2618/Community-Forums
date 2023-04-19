@@ -6,7 +6,13 @@ export default createStore({
     showLogin: false, //是否展示登录信息
     //板块信息
     boardList: [],
+    //当前一级板块
+    activePBoardId: 0,
+    //当前二级板块
+    activeBoardId: 0,
   },
+
+  //相当于计算属性
   getters: {
     getLoginUserInfo: (state) => {
       return state.loginUserInfo;
@@ -20,7 +26,15 @@ export default createStore({
       });
       return board ? board.children : [];
     },
+    getActivePBoardId: (state) => {
+      return state.activePBoardId;
+    },
+    getActiveBoardId: (state) => {
+      return state.activeBoardId;
+    },
   },
+
+  //唯一可以修改state里面的属性值 的方法
   mutations: {
     updateLoginUserInfo(state, value) {
       state.loginUserInfo = value;
@@ -31,7 +45,15 @@ export default createStore({
     saveBoardList(state, value) {
       state.boardList = value;
     },
+    setActivePBoardId: (state, value) => {
+      state.activePBoardId = value;
+    },
+    setActiveBoardId: (state, value) => {
+      state.activeBoardId = value;
+    },
   },
+
+  //可以进行异步操作
   actions: {},
   modules: {},
 });

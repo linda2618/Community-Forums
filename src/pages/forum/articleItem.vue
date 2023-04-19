@@ -9,14 +9,15 @@
                     <div class="post-time">{{ data.postTime }}</div>
                     <div class="address">{{ data.userIpAddress }}</div>
                     <el-divider direction="vertical" />
-                    <router-link :to="'/'" class="a-link">{{ data.pBoardName }}</router-link>
+                    <router-link :to="`/forum/${data.pBoardId}`" class="a-link">{{ data.pBoardName }}</router-link>
                     <template v-if="data.boardName">
                         <el-divider direction="vertical" />
-                        <router-link :to="'/'" class="a-link">{{ data.boardName }}</router-link>
+                        <router-link :to="`/forum/${data.pBoardId}/${data.boardId}`" class="a-link">{{ data.boardName
+                        }}</router-link>
                     </template>
 
                 </div>
-                <router-link :to="'/'" class="title">{{ data.title }}</router-link>
+                <router-link :to="`/post/${data.articleId}`" class="title">{{ data.title }}</router-link>
                 <div class="summary">{{ data.summary }}</div>
                 <div class="article-info">
                     <span class="iconfont icon-yanjing2">

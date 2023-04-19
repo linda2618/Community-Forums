@@ -2,9 +2,13 @@
     <div class="w ">
         <!-- 二级模板展示 -->
         <div class="sub-board" v-if="pBoardId">
-            <span>全部</span>
-            <span v-for="item in subBoardList">
-                {{ item.boardName }}</span>
+            <span :class="boardId == 0 ? 'active' : ''"> <router-link :to="`/forum/${pBoardId}`">全部
+                </router-link></span>
+            <span v-for="item in subBoardList" :class="item.boardId == boardId ? 'active' : ''">
+                <router-link :to="`/forum/${item.pBoardId}/${item.boardId}`">
+                    {{ item.boardName }}
+                </router-link>
+            </span>
         </div>
         <div class="article-contain">
             <div class="top-tab">
@@ -75,7 +79,7 @@ const loadArticle = async () => {
     if (!result) { return }
     articleInfo.value = result.data
 }
-loadArticle()
+// loadArticle()
 const changeOrderType = (x: number) => {
     orderType.value = x
     loadArticle()
@@ -90,9 +94,11 @@ const setSubBoard = () => {
 watch(() => route.params,
     (newVal: any, oldVal: any) => {
         pBoardId.value = newVal.pBoardId
-        boardId.value = newVal.boardId
+        boardId.value = newVal.boardId || 0
         loadArticle()
         setSubBoard()
+        store.commit("setActivePBoardId", newVal.pBoardId)
+        store.commit("setActiveBoardId", newVal.boardId)
     }, { immediate: true, deep: true }
 )
 
@@ -101,6 +107,18 @@ watch(() => route.params,
 <style scoped lang="less">
 .sub-board {
     margin-top: 10px;
+
+    a {
+        text-decoration: none;
+        color: #fffdfd;
+
+    }
+
+    .active {
+        a {
+            color: rgb(81, 216, 142);
+        }
+    }
 
     span {
         background: #d4d0d0;

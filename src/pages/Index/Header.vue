@@ -9,16 +9,20 @@
             <!-- 模板信息 -->
 
             <div class="nav-menu">
-                <span class="menu-item" to="/">首页</span>
+                <router-link :class="['menu-item home', activePBoardId == undefined ? 'active' : '']"
+                    to="/">首页</router-link>
                 <template v-for="board in boardList">
                     <el-popover placement="bottom-start" :width="300" trigger="hover" v-if="board.children.length > 0">
                         <template #reference>
-                            <span class="menu-item" @click="boardClick(board)">{{ board.boardName }}</span>
+                            <span :class="['menu-item', board.boardId == activePBoardId ? 'active' : '']"
+                                @click="boardClick(board)">{{ board.boardName }}</span>
                         </template>
 
                         <div class="sub-board-list">
-                            <span v-for="subList in board.children" class="sub-board" @click="subBoardClick(subList)">{{
-                                subList.boardName }}</span>
+                            <span v-for="subList in board.children"
+                                :class="['sub-board', subList.boardId == activeBoardId ? 'active' : '']"
+                                @click="subBoardClick(subList)">{{
+                                    subList.boardName }}</span>
                         </div>
                     </el-popover>
                     <span class="menu-item" v-else @click="boardClick(board)">{{ board.boardName }}</span>
@@ -171,12 +175,26 @@ watch(() => store.state.showLogin, (newValue, oldValue) => {
 
 //板块点击
 const boardClick = (board: any) => {
-    console.log(board.boardId)
+    // console.log(board.boardId)
     router.push(`/forum/${board.boardId}`)
 }
 const subBoardClick = (subBoard: any) => {
     router.push(`/forum/${subBoard.pBoardId}/${subBoard.boardId}`)
 }
+
+
+//当前选中的版块
+const activePBoardId = ref(0)
+watch(() => store.state.activePBoardId, (newVal, oldVal) => {
+    if (newVal != 0) {
+        activePBoardId.value = newVal
+    }
+}, { immediate: true, deep: true })
+
+const activeBoardId = ref(0)
+watch(() => store.state.activeBoardId, (newVal, oldVal) => {
+    activeBoardId.value = newVal
+}, { immediate: true, deep: true })
 </script>
 
 <style scoped lang="less">
@@ -212,6 +230,15 @@ const subBoardClick = (subBoard: any) => {
         .menu-item {
             margin-left: 40px;
             cursor: pointer;
+        }
+
+        .home {
+            text-decoration: none;
+            color: #000;
+        }
+
+        .active {
+            color: rgb(31, 223, 117);
         }
     }
 
@@ -315,7 +342,11 @@ const subBoardClick = (subBoard: any) => {
     }
 
     .sub-board:hover {
-        color: rgb(64, 158, 255)
+        color: rgb(31, 223, 117);
+    }
+
+    .active {
+        color: rgb(31, 223, 117);
     }
 }
 </style>
