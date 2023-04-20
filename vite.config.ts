@@ -5,7 +5,7 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig({
   plugins: [vue()],
   server: {
-    port: 8080, //设置服务器启动端口号
+    port: 3004, //设置服务器启动端口号
     proxy: {
       "/api": {
         target: "http://localhost:7070/api",

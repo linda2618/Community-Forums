@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { Loading } from 'element-plus/es/components/loading/src/service';
-import { pa } from 'element-plus/es/locale';
+// import { pa } from 'element-plus/es/locale';
 import { ref } from 'vue'
 // const background = ref('#1ef087')
 interface pageType {
