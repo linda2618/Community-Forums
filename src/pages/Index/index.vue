@@ -8,7 +8,7 @@
         <!-- <Main></Main> -->
 
         <!-- 底部模块 -->
-        <Footer></Footer>
+        <!-- <Footer></Footer> -->
 
     </div>
 </template>

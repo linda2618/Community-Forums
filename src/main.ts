@@ -19,6 +19,7 @@ import Dialog from "./components/Dialog.vue";
 import Avatar from "./components/avatar.vue";
 import Pagination from "./components/Pagination.vue";
 import Nodata from "./components/Nodata.vue";
+import ImageViewer from './components/ImageViewer.vue'
 //定义全局方法
 import Verity from "./utils/verify";
 import Message from "./utils/message";
@@ -36,4 +37,5 @@ app.component("Dialog", Dialog);
 app.component("Avatar", Avatar);
 app.component("Pagination", Pagination);
 app.component("Nodata", Nodata);
+app.component("ImageViewer", ImageViewer);
 app.use(router).use(ElementPlus).use(store).mount("#app");

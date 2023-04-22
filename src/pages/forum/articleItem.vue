@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { dataType } from '../../type/articleBoard'
+import { dataType } from '../../type/article'
 interface propsType {
     data: dataType
 
