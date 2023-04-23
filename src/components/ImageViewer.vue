@@ -1,29 +1,42 @@
 <template>
     <div class="image-viewer">
-        <el-image hide-on-click-modal :initial-index="previewImgIndex" url-list="imageList" @close="closeImgViewer"
-            v-if="previewImgIndex != 0" />
+        <el-image-viewer hide-on-click-modal :initial-index="previewImgIndex" :url-list="imageList" @close="closeImgViewer"
+            fit="cover" v-if="previewImgIndex != null">
+        </el-image-viewer>
 
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, defineExpose } from 'vue'
 interface imageData {
-    imageList: []
+    imageList: Array<any>
 }
 const props = withDefaults(defineProps<imageData>(), {
-    imageList: () => { return [] }
 })
 
 
-const previewImgIndex = ref(0)
+const previewImgIndex = ref(null)
 
-const show = (index: number) => {
+const show = (index: any) => {
+    stopScroll()
     previewImgIndex.value = index
 }
 
 defineExpose({ show })
-const closeImgViewer = () => { }
+const closeImgViewer = () => {
+    startScroll()
+    previewImgIndex.value = null
+}
+
+//禁止滚动
+const stopScroll = () => {
+    document.body.style.overflow = "hidden"
+}
+
+const startScroll = () => {
+    document.body.style.overflow = "auto"
+}
 </script>
 
 <style scoped lang="less"></style>

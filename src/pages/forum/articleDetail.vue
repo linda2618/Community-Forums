@@ -34,13 +34,15 @@
                         </div>
                     </div>
                     <!-- 文章详情 -->
-                    <div class="detail" id="detail" v-html="articleInfo.content"></div>
-                    <!-- 评论 -->
-                    <div class="comment-panel" id="view-comment">
-                        评论
-                    </div>
+                    <div id="detail" v-html="articleInfo.content"></div>
                 </div>
             </div>
+            <!-- 评论 -->
+            <div class="comment-panel" id="view-comment">
+                <CommentList v-if="articleInfo.articleId" :articleId="articleInfo.articleId"
+                    :article-user-id="articleInfo.userId"></CommentList>
+            </div>
+
         </div>
 
     </div>
@@ -59,15 +61,21 @@
                 <span class="iconfont icon-duihuaxinxi"></span>
             </div>
         </el-badge>
+        <!-- 图片预览 -->
+        <ImageViewer ref="imageViewRef" :imageList="previewImgList"></ImageViewer>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, getCurrentInstance, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, getCurrentInstance, onMounted, onUnmounted, nextTick } from 'vue'
+//引入评论组件
+import CommentList from './commentList.vue'
 import { useRoute, useRouter } from 'vue-router';
 import ArticleItem from './articleItem.vue';
 const { proxy } = getCurrentInstance() as any
-import { articaleDetailType } from '../../type/article'
+// import { articaleDetailType } from '../../type/article'
+import { useStore } from 'vuex'
+const store = useStore()
 
 const route = useRoute()
 
@@ -87,7 +95,15 @@ const getArticleDetail = async (articleId: string | string[]) => {
     if (!result) { return }
     articleInfo.value = result.data.forumArticle
     haveLike.value = result.haveLike
+
+
+    store.commit("setActivePBoardId", result.data.forumArticle.pBoardId)
+    store.commit("setActiveBoardId", result.data.forumArticle.boardId)
+
+    //图片预览
+    imagePreview()
 }
+
 onMounted(() => {
     getArticleDetail(route.params.articleId)
 })
@@ -137,6 +153,27 @@ const addLikeHander = async () => {
 }
 
 //文章图片预览
+const imageViewRef = ref(null)
+const previewImgList: any = ref([])
+const imagePreview = () => {
+    nextTick(() => {
+        console.log(',,,', imageViewRef.value)
+
+        const imageNodeList = document.querySelector("#detail")?.querySelectorAll('img')
+        const imageList: any = []
+
+        imageNodeList?.forEach((item, index) => {
+            const src = item.getAttribute("src")
+            imageList.push(src)
+            item.addEventListener("click", () => {
+                //未完成！！！
+                // imageViewRef.value.show(index)
+            })
+        })
+
+        previewImgList.value = imageList
+    })
+}
 
 </script>
 
@@ -155,6 +192,7 @@ const addLikeHander = async () => {
     }
 
     .detail-container {
+
 
         .article-detail {
             background-color: #fff;
@@ -175,6 +213,7 @@ const addLikeHander = async () => {
                     margin-left: 10px;
 
                     .nick-name {
+                        font-size: 14px;
                         text-decoration: none;
                         color: #627087;
                     }
@@ -185,11 +224,12 @@ const addLikeHander = async () => {
 
                     .time-info {
                         margin-top: 5px;
-                        font-size: 13px;
+                        font-size: 12px;
                         color: #999797;
 
                         .iconfont {
                             margin-left: 10px;
+                            font-size: 12px;
                         }
 
                         .iconfont::before {
@@ -199,27 +239,36 @@ const addLikeHander = async () => {
                 }
             }
 
-            .detail {
+            #detail {
                 margin-top: 10px;
                 letter-spacing: 1px;
                 line-height: 20px;
 
-                a {
+                /deep/ a {
                     text-decoration: none;
                     color: rgb(93, 233, 151);
                 }
 
-                span img {
+                // /deep/ img 
+                ::v-deep img {
                     max-width: 80%;
                     cursor: pointer;
                 }
             }
-
-            .comment-panel {}
-
         }
+
+
     }
+
+    .comment-panel {
+        margin-top: 20px;
+        background: #fff;
+        padding: 10px;
+    }
+
+
 }
+
 
 .quick-panel {
     position: absolute;

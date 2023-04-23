@@ -2,10 +2,11 @@
     <div class="avatar" :style="{ width: width + 'px', height: width + 'px', borderRadius: width / 2 + 'px' }">
 
         <el-image v-if="userId" :style="{
-            width: width + 'px', height: width + 'px', borderRadius: width / 2 + 'px'
-        }" :src="proxy.globalInfo.avatarUrl + userId" fit="scale-down" loading="lazy" @click="goToRouter">
+                width: width + 'px', height: width + 'px', borderRadius: width / 2 + 'px'
+            }" :src="proxy.globalInfo.avatarUrl + userId" fit="scale-down" loading="lazy" @click="goToRouter">
 
         </el-image>
+        <div v-else class="no-login">未登录</div>
     </div>
 </template>
 
@@ -33,4 +34,13 @@ const goToRouter = () => {
 
 </script>
 
-<style scoped></style>
+<style scoped lang="less">
+.no-login {
+    width: 45px;
+    height: 45px;
+    line-height: 45px;
+    border-radius: 50%;
+    font-size: 13px;
+    background-color: #ccc;
+}
+</style>
