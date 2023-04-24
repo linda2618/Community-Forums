@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, defineExpose } from 'vue'
+import { ref, reactive } from 'vue'
 interface imageData {
     imageList: Array<any>
 }

@@ -10,32 +10,27 @@
         </div>
 
         <div class="comment-form-panel">
-            <Avatar :width="45" :userId="currentUserInfo.userId"></Avatar>
-            <div class="comment-form">
-                <el-form :model="formData" :rules="rules" ref="dormDataRef" labe-width="80px">
-                    <el-form-item prop="content">
-                        <el-input clearable placeholder="请文明发言做一个棒棒的程序员" type="textarea" :row="5" :maxLength="150"
-                            show-word-limit v-model="formData.content" />
-                        <div class="insert-img" v-if="currentUserInfo.userId">
-                            <el-upload name="file" :show-file-list="false">
-                                <span class="iconfont icon-image"></span>
-
-                            </el-upload>
-                        </div>
-                    </el-form-item>
-                </el-form>
-            </div>
-            <div class="send-btn">
-                发表
-            </div>
+            <PostComment></PostComment>
+        </div>
+        <div class="comment-list">
+            <!-- 分页 -->
+            <Pagination :loading="loading" :dataSource="commentListInfo" @loadData="loadComment">
+                <template #default="{ data }">
+                    <commentListItem :commentData="data" :articleUserId="articleUserId"
+                        :currentUserId="currentUserInfo.userId"></commentListItem>
+                </template>
+            </Pagination>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { proxyRefs, ref, watch, getCurrentInstance, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import commentListItem from './commentListItem.vue'
+import PostComment from '../../components/PostComment.vue'
 const store = useStore()
+const { proxy } = getCurrentInstance() as any
 interface commentData {
     articleId: string,
     articleUserId: string
@@ -44,6 +39,12 @@ interface commentData {
 const props = withDefaults(defineProps<commentData>(), {
 })
 
+const api = {
+    loadComment: '/comment/loadComment',
+    postComment: '/comment/postComment',
+    doLike: '/comment/doLike',
+    changeTopType: '/comment/changeTopType'
+}
 //form信息
 const formData: any = ref({})
 const formDataRef = ref()
@@ -59,6 +60,33 @@ watch(
     (newVal, oldVal) => { currentUserInfo.value = newVal || {} },
     { immediate: true, deep: true }
 )
+
+//选择图片
+const selectImg = () => {
+
+}
+//排序
+const orderType = ref(0)
+//评论列表
+const loading = ref(false)
+const commentListInfo: any = ref({})
+const loadComment = async () => {
+    let params = {
+        pageNo: commentListInfo.value.pageNo,
+        articleId: props.articleId,
+        orderType: orderType.value
+    }
+    loading.value = true
+    let result = await proxy.request({
+        url: api.loadComment,
+        params,
+    })
+    loading.value = false
+    if (!result) { return }
+
+    commentListInfo.value = result.data
+}
+loadComment()
 
 </script>
 

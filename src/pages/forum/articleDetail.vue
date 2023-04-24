@@ -72,9 +72,10 @@ import { ref, reactive, getCurrentInstance, onMounted, onUnmounted, nextTick } f
 import CommentList from './commentList.vue'
 import { useRoute, useRouter } from 'vue-router';
 import ArticleItem from './articleItem.vue';
+import { useStore } from 'vuex'
 const { proxy } = getCurrentInstance() as any
 // import { articaleDetailType } from '../../type/article'
-import { useStore } from 'vuex'
+
 const store = useStore()
 
 const route = useRoute()
