@@ -40,7 +40,7 @@
             <!-- 评论 -->
             <div class="comment-panel" id="view-comment">
                 <CommentList v-if="articleInfo.articleId" :articleId="articleInfo.articleId"
-                    :article-user-id="articleInfo.userId"></CommentList>
+                    :article-user-id="articleInfo.userId" @updateCommentCount="updateCommentCount"></CommentList>
             </div>
 
         </div>
@@ -176,6 +176,11 @@ const imagePreview = () => {
     })
 }
 
+//更新评论数量
+const updateCommentCount = (commentCount: number) => {
+    articleInfo.value.commentCount = commentCount
+
+}
 </script>
 
 <style scoped lang="less">
